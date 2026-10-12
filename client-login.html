@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Client Login | Voyage Uganda</title>
+  <meta name="theme-color" content="#1b5a39">
+  <link rel="stylesheet" href="voyage-theme.css">
+  <style>
+    .login-card { max-width: 420px; margin: 0 auto; }
+    .login-actions { display: flex; flex-direction: column; gap: .8rem; margin-top: 1.2rem; }
+    .err { color: #b3261e; font-size: .88rem; margin-top: .5rem; display: none; }
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="container">
+    <span class="license">Client portal</span>
+    <span><a href="client-account.html">Create account</a> · <a href="Login.html">Supplier login</a></span>
+  </div>
+</div>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="index.html">
+      <img src="logo.png" alt="" width="46" height="46" onerror="this.style.display='none'">
+      <span class="brand-text"><span class="brand-name">voyage uganda</span><span class="brand-tag">Client login</span></span>
+    </a>
+    <nav class="nav"><a href="index.html">Home</a><a href="itineraries.html">Itineraries</a>
+      <a class="btn btn-primary" href="client-account.html">Sign up</a></nav>
+  </div>
+</header>
+<main>
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Traveller portal</span>
+        <h2>Login as a client</h2>
+        <div class="divider"></div>
+        <p>Browse freely. Sign in to book or request a quote.</p>
+      </div>
+      <div class="form-card login-card" style="margin-bottom:1.2rem">
+        <button type="button" class="btn btn-outline-dark" id="google-login" style="width:100%">Continue with Google</button>
+      </div>
+      <form class="form-card login-card" id="client-login">
+        <div class="field"><label for="email">Email *</label>
+          <input id="email" name="email" type="email" required autocomplete="username"></div>
+        <div class="field"><label for="password">Password *</label>
+          <input id="password" name="password" type="password" required autocomplete="current-password"></div>
+        <p class="err" id="err"></p>
+        <div class="login-actions">
+          <button class="btn btn-primary" type="submit" style="width:100%">Sign in</button>
+          <a class="btn btn-outline-dark" href="client-account.html" style="width:100%;text-align:center">Create free account</a>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+<script type="module">
+  import { loginEmail, loginGoogle, ensureUserProfile, watchAuth } from "./js/firebase-app.js";
+  const redirect = new URLSearchParams(location.search).get("redirect") || "itineraries.html";
+  watchAuth((u) => { if (u) location.replace(redirect); });
+  function showErr(m){ const e=document.getElementById("err"); e.style.display="block"; e.textContent=m; }
+  document.getElementById("google-login").onclick = async () => {
+    try {
+      const cred = await loginGoogle();
+      await ensureUserProfile(cred.user, { role: "client" });
+      location.href = redirect;
+    } catch (e) { showErr(e.message || "Google sign-in failed"); }
+  };
+  document.getElementById("client-login").onsubmit = async (e) => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    try {
+      const cred = await loginEmail(f.email, f.password);
+      await ensureUserProfile(cred.user, { role: "client" });
+      location.href = redirect;
+    } catch (err) { showErr(err.message || "Login failed"); }
+  };
+</script>
+</body>
+</html>

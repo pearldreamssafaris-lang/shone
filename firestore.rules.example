@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isAdmin() {
+      return signedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+    }
+
+    match /suppliers/{uid} {
+      allow read: if true;
+      allow create, update: if isOwner(uid) || isAdmin();
+    }
+
+    match /itineraries/{id} {
+      allow read: if resource.data.status == 'approved' || isAdmin()
+        || (signedIn() && resource.data.supplierId == request.auth.uid);
+      allow create: if signedIn();
+      allow update, delete: if isAdmin()
+        || (signedIn() && resource.data.supplierId == request.auth.uid);
+    }
+
+    match /reviews/{id} {
+      allow read: if true;
+      allow create: if signedIn();
+    }
+
+    match /subscription_requests/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.supplierId == request.auth.uid);
+      allow create: if signedIn();
+      allow update: if isAdmin();
+    }
+  }
+}

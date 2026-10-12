@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Itinerary | Voyage Uganda</title>
+  <meta name="theme-color" content="#1b5a39">
+  <link rel="stylesheet" href="voyage-theme.css">
+  <style>
+    .detail-hero{min-height:300px;color:#fff;background:var(--green-900) center/cover;display:flex;align-items:flex-end;position:relative}
+    .detail-hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(14,47,30,.92))}
+    .detail-hero .container{position:relative;z-index:1;padding:4rem 0 2rem}
+    .detail-hero h1{color:#fff}
+    .detail-grid{display:grid;grid-template-columns:1fr 320px;gap:2rem;align-items:start}
+    @media(max-width:900px){.detail-grid{grid-template-columns:1fr}}
+    .price-box{background:#fff;border-radius:14px;padding:1.4rem;box-shadow:var(--shadow-md);border-top:4px solid var(--orange-500);position:sticky;top:90px}
+    .day-card{background:#fff;border-left:4px solid var(--green-700);padding:1rem 1.2rem;border-radius:10px;margin-bottom:.8rem;box-shadow:var(--shadow-sm)}
+    .incl-list{list-style:none;padding:0}.incl-list li{padding:.3rem 0 .3rem 1.3rem;position:relative}
+    .incl-list.yes li::before{content:"✓";position:absolute;left:0;color:var(--green-700);font-weight:700}
+    .incl-list.no li::before{content:"–";position:absolute;left:0;color:#b3261e}
+  </style>
+</head>
+<body>
+<div class="topbar"><div class="container">
+  <span class="license">Package detail</span>
+  <span><a href="itineraries.html">All itineraries</a> · <a href="client-login.html">Login</a></span>
+</div></div>
+<header class="site-header"><div class="container">
+  <a class="brand" href="index.html"><img src="logo.png" alt="" width="46" height="46" onerror="this.style.display='none'">
+    <span class="brand-text"><span class="brand-name">voyage uganda</span><span class="brand-tag">Details</span></span></a>
+  <nav class="nav"><a href="index.html">Home</a><a href="itineraries.html">Itineraries</a>
+    <a class="btn btn-primary" href="client-account.html">Sign up</a></nav>
+</div></header>
+<main id="root"><div class="section" style="text-align:center"><p>Loading…</p></div></main>
+
+<script type="module">
+  import { getItinerary, listReviews, addReview, watchAuth, auth } from "./js/firebase-app.js";
+
+  const id = new URLSearchParams(location.search).get("id");
+  const root = document.getElementById("root");
+  let user = null;
+  watchAuth((u) => { user = u; });
+
+  if (!id) {
+    root.innerHTML = '<div class="section" style="text-align:center"><p>Missing itinerary id.</p><a href="itineraries.html">Back</a></div>';
+  } else {
+    load();
+  }
+
+  async function load() {
+    try {
+      const itin = await getItinerary(id);
+      if (!itin || itin.status !== "approved") {
+        // allow supplier/admin to preview non-approved later; for public require approved
+        if (!itin) {
+          root.innerHTML = '<div class="section" style="text-align:center"><p>Not found.</p><a href="itineraries.html">Back</a></div>';
+          return;
+        }
+      }
+      const reviews = await listReviews(id).catch(() => []);
+      const img = itin.image || "https://www.voyageuganda.com/IMG_3108.jpeg";
+      const days = (itin.days || []).map((d) => `
+        <div class="day-card"><h3 style="margin:0 0 .4rem;font-size:1.05rem">Day ${d.day}: ${d.title||""}</h3>
+        <p style="margin:0;font-size:.92rem">${d.desc||""}</p>
+        ${d.lodge?`<p style="font-size:.82rem;color:var(--ink-soft);margin:.4rem 0 0"><strong>Overnight:</strong> ${d.lodge}</p>`:""}
+        ${d.meals?`<p style="font-size:.82rem;color:var(--ink-soft)"><strong>Meals:</strong> ${d.meals}</p>`:""}
+        </div>`).join("") || "<p>Plan confirmed on booking.</p>";
+
+      root.innerHTML = `
+      <section class="detail-hero" style="background-image:url('${img}')">
+        <div class="container">
+          <span class="eyebrow" style="color:var(--gold-300)">${itin.category||"Safari"}</span>
+          <h1>${itin.title||""}</h1>
+          <p style="color:var(--beige-100)">★ ${(itin.rating||4.5)} (${itin.reviewsCount||reviews.length} reviews) · ${itin.duration} days · From $${Number(itin.price||0).toLocaleString()}</p>
+        </div>
+      </section>
+      <section class="section"><div class="container"><div class="detail-grid">
+        <div>
+          <p style="font-size:1.05rem;color:var(--ink-soft)">${itin.summary||""}</p>
+          <div class="gyg-meta" style="margin:1rem 0">
+            ${itin.freeCancel?'<span class="gyg-chip green">Free cancellation</span>':''}
+            <span class="gyg-chip">${itin.duration} days</span>
+            <span class="gyg-chip blue">${itin.languages||"EN"}</span>
+            ${itin.range?`<span class="range-badge ${itin.range}">${itin.range}</span>`:''}
+          </div>
+          <h2 style="font-size:1.3rem">Highlights</h2>
+          <ul class="incl-list yes">${(itin.highlights||[]).map(h=>`<li>${h}</li>`).join("")||"<li>—</li>"}</ul>
+          <h2 style="font-size:1.3rem;margin-top:1.5rem">Day-by-day</h2>
+          ${days}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem">
+            <div><h3 style="font-size:1.05rem">Included</h3><ul class="incl-list yes">${(itin.includes||[]).map(x=>`<li>${x}</li>`).join("")||"<li>—</li>"}</ul></div>
+            <div><h3 style="font-size:1.05rem">Not included</h3><ul class="incl-list no">${(itin.excludes||[]).map(x=>`<li>${x}</li>`).join("")||"<li>—</li>"}</ul></div>
+          </div>
+          <h2 style="font-size:1.3rem;margin-top:2rem">Traveller reviews</h2>
+          <div id="reviews">${reviews.length?reviews.map(r=>`
+            <div class="review-block"><div class="stars">${"★".repeat(r.score||5)}</div>
+            <p>${r.text||""}</p><div class="who"><strong>${r.name||"Traveller"}</strong> · ${r.country||""}</div></div>`).join(""):"<p style='color:var(--ink-soft)'>No reviews yet. Be the first after your trip.</p>"}</div>
+          <form id="review-form" class="form-card" style="margin-top:1rem">
+            <h3 style="margin-top:0;font-size:1rem">Write a review</h3>
+            <div class="form-grid">
+              <div class="field"><label>Score</label><select name="score"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
+              <div class="field"><label>Country</label><input name="country" placeholder="e.g. UK"></div>
+              <div class="field full"><label>Your review</label><textarea name="text" rows="3" required></textarea></div>
+            </div>
+            <button class="btn btn-primary" type="submit" style="margin-top:.8rem">Submit review</button>
+            <p class="form-note">Requires client login.</p>
+          </form>
+        </div>
+        <aside>
+          <div class="price-box">
+            <div style="font-size:.85rem;color:var(--ink-soft)">From</div>
+            <div style="font:800 1.8rem var(--font-display);color:var(--green-900)">$${Number(itin.price||0).toLocaleString()}</div>
+            <div style="font-size:.88rem;color:var(--ink-soft);margin-bottom:1rem">${itin.price_basis||"per person sharing"}</div>
+            <button class="btn btn-primary" id="book" style="width:100%;margin-bottom:.5rem">Check availability / Book</button>
+            <a class="btn btn-outline-dark" style="width:100%;text-align:center" href="https://wa.me/256762584996?text=${encodeURIComponent("Hi, enquiry about: "+(itin.title||""))}" target="_blank">WhatsApp</a>
+            <p id="book-note" class="form-note" style="display:none">Please <a href="client-login.html?redirect=${encodeURIComponent("itinerary-detail.html?id="+id)}">log in</a> to book.</p>
+          </div>
+        </aside>
+      </div></div></section>`;
+
+      document.getElementById("book").onclick = () => {
+        if (!user) {
+          document.getElementById("book-note").style.display = "block";
+          location.href = "client-login.html?redirect=" + encodeURIComponent("itinerary-detail.html?id=" + id);
+          return;
+        }
+        const msg = `Book / quote request\n${itin.title}\nUSD ${itin.price}\nUser: ${user.email}`;
+        window.open("https://wa.me/256762584996?text=" + encodeURIComponent(msg), "_blank");
+      };
+
+      document.getElementById("review-form").onsubmit = async (e) => {
+        e.preventDefault();
+        if (!user) {
+          alert("Log in as a client to review.");
+          location.href = "client-login.html?redirect=" + encodeURIComponent("itinerary-detail.html?id=" + id);
+          return;
+        }
+        const f = Object.fromEntries(new FormData(e.target));
+        await addReview(id, {
+          score: Number(f.score),
+          text: f.text,
+          country: f.country || "",
+          name: user.displayName || user.email.split("@")[0],
+          userId: user.uid
+        });
+        alert("Review submitted. Thank you!");
+        load();
+      };
+    } catch (e) {
+      root.innerHTML = `<div class="section" style="text-align:center"><p style="color:#b3261e">${e.message}</p></div>`;
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin · Review Itineraries | Voyage Uganda</title>
+  <meta name="theme-color" content="#1b5a39">
+  <link rel="stylesheet" href="voyage-theme.css">
+  <style>
+    .admin-table { width: 100%; border-collapse: collapse; background: var(--white); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .admin-table th, .admin-table td { padding: .85rem 1rem; text-align: left; border-bottom: 1px solid var(--beige-200); font-size: .9rem; }
+    .admin-table th { background: var(--green-900); color: var(--beige-100); font-weight: 600; }
+    .admin-table tr:hover td { background: var(--beige-50); }
+    .status-badge { font-size: .72rem; font-weight: 800; padding: .2rem .55rem; border-radius: 999px; text-transform: uppercase; }
+    .status-pending { background: #fdefd6; color: var(--orange-700); }
+    .status-approved { background: var(--green-100); color: var(--green-800); }
+    .status-draft { background: #e8e8e8; color: #555; }
+    .status-rejected { background: #fde8e8; color: #b3261e; }
+    .actions button { margin-right: .4rem; font-size: .8rem; padding: .35rem .7rem; min-height: 0; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="container">
+    <span class="license">Admin only · Review &amp; approve itineraries before they go live</span>
+    <span><a href="itinerary-editor.html">Create itinerary</a>&nbsp;•&nbsp;<a href="index.html">Public site</a></span>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="index.html">
+      <img src="logo.png" alt="" width="46" height="46" onerror="this.style.display='none'">
+      <span class="brand-text">
+        <span class="brand-name">voyage uganda</span>
+        <span class="brand-tag">Admin · Itinerary review</span>
+      </span>
+    </a>
+    <nav class="nav" id="nav">
+      <a href="admin-dashboard.html">Dashboard</a>
+      <a href="admin-itineraries.html" aria-current="page">Review queue</a>
+      <a href="itinerary-editor.html">Editor</a>
+      <a href="itineraries.html">Public list</a>
+      <a class="btn btn-primary" href="index.html">View site</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Admin dashboard</span>
+        <h2>Itinerary review queue</h2>
+        <div class="divider"></div>
+        <p>Only <strong>approved</strong> itineraries appear on the homepage and public itineraries page with prices. Clients can view them without logging in; booking requires a client account.</p>
+      </div>
+
+      <div class="notice" style="margin-bottom:1.5rem">
+        <strong>Demo mode:</strong> This page reads itineraries saved from the editor (localStorage). On a live site this would be a secured admin area with real database records and email notifications.
+      </div>
+
+      <div style="overflow-x:auto">
+        <table class="admin-table" id="admin-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Days</th>
+              <th>Price (USD)</th>
+              <th>Status</th>
+              <th>Submitted</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-body">
+            <tr><td colspan="6" style="text-align:center;color:var(--ink-soft)">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom" style="margin-top:0;border:0">
+      <span>© 2026 Voyage Uganda · Admin tools</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function loadQueue() {
+    const all = JSON.parse(localStorage.getItem('voyage_itineraries') || '[]');
+    const tbody = document.getElementById('admin-body');
+    if (!all.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-soft)">No itineraries submitted yet. Use the <a href="itinerary-editor.html">editor</a> to create one and set status to “Submit for admin review”.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = all.map((itin, idx) => `
+      <tr data-idx="${idx}">
+        <td><strong>${itin.title || 'Untitled'}</strong><br><small>${(itin.parks||[]).slice(0,3).join(', ')}</small></td>
+        <td>${itin.duration || '—'}</td>
+        <td>$${Number(itin.price || 0).toLocaleString()}</td>
+        <td><span class="status-badge status-${itin.status || 'draft'}">${itin.status || 'draft'}</span></td>
+        <td>${itin.created ? new Date(itin.created).toLocaleDateString() : '—'}</td>
+        <td class="actions">
+          <button class="btn btn-green btn-approve" data-idx="${idx}">Approve</button>
+          <button class="btn btn-outline-dark btn-reject" data-idx="${idx}">Reject</button>
+          <button class="btn btn-outline-dark btn-view" data-idx="${idx}">View</button>
+        </td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('.btn-approve').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const all = JSON.parse(localStorage.getItem('voyage_itineraries') || '[]');
+        all[btn.dataset.idx].status = 'approved';
+        localStorage.setItem('voyage_itineraries', JSON.stringify(all));
+        loadQueue();
+        alert('Itinerary approved. It will now appear on the public itineraries page and can be featured on the homepage.');
+      });
+    });
+    tbody.querySelectorAll('.btn-reject').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const all = JSON.parse(localStorage.getItem('voyage_itineraries') || '[]');
+        all[btn.dataset.idx].status = 'rejected';
+        localStorage.setItem('voyage_itineraries', JSON.stringify(all));
+        loadQueue();
+      });
+    });
+    tbody.querySelectorAll('.btn-view').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const all = JSON.parse(localStorage.getItem('voyage_itineraries') || '[]');
+        const i = all[btn.dataset.idx];
+        alert(`${i.title}\n\n${i.summary || ''}\n\nParks: ${(i.parks||[]).join(', ')}\nLodges: ${(i.lodges||[]).join(', ')}\nPrice: USD ${i.price}\nStatus: ${i.status}`);
+      });
+    });
+  }
+  loadQueue();
+</script>
+</body>
+</html>

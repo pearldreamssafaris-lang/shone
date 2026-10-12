@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Safari Itineraries | Voyage Uganda</title>
+  <meta name="theme-color" content="#1b5a39">
+  <link rel="stylesheet" href="voyage-theme.css">
+  <style>
+    .itin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem}
+    .itin-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm);border-top:4px solid var(--gold-500);display:flex;flex-direction:column}
+    .itin-card .img{height:180px;background:var(--green-800) center/cover;position:relative;display:block}
+    .badge-price{position:absolute;bottom:.8rem;left:.8rem;background:var(--orange-500);color:var(--ink);font-weight:800;font-size:.85rem;padding:.3rem .7rem;border-radius:999px}
+    .itin-card .body{padding:1.2rem;flex:1;display:flex;flex-direction:column}
+    .filter-bar{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.5rem}
+    .filter-bar select,.filter-bar input{padding:.55rem .9rem;border-radius:999px;border:1.5px solid var(--beige-200);font:inherit;font-size:.9rem}
+  </style>
+</head>
+<body>
+<div class="topbar"><div class="container">
+  <span class="license">Approved packages · Live from Firestore</span>
+  <span id="auth-bar"><a href="client-login.html">Client login</a> · <a href="Login.html">Supplier</a></span>
+</div></div>
+<header class="site-header"><div class="container">
+  <a class="brand" href="index.html"><img src="logo.png" alt="" width="46" height="46" onerror="this.style.display='none'">
+    <span class="brand-text"><span class="brand-name">voyage uganda</span><span class="brand-tag">Itineraries</span></span></a>
+  <nav class="nav"><a href="index.html">Home</a><a href="itineraries.html" aria-current="page">Itineraries</a>
+    <a class="btn btn-primary" href="client-account.html">Plan my trip</a></nav>
+</div></header>
+<main>
+<section class="section"><div class="container">
+  <div class="section-head">
+    <span class="eyebrow">Safari packages</span>
+    <h2>Browse by budget, destination &amp; reviews</h2>
+    <div class="divider"></div>
+    <p>View freely. Sign in to book. Only admin-approved itineraries are listed.</p>
+  </div>
+  <div class="filter-bar">
+    <select id="f-range"><option value="">All budgets</option><option value="budget">Budget</option><option value="midrange">Mid-range</option><option value="luxury">Luxury</option></select>
+    <select id="f-cat"><option value="">All categories</option><option>Gorilla trekking</option><option>Classic safari</option><option>Great Migration</option><option>Multi-country</option></select>
+    <input type="search" id="f-q" placeholder="Search…">
+  </div>
+  <div class="itin-grid" id="list"><p style="grid-column:1/-1;text-align:center">Loading packages…</p></div>
+  <p class="notice" style="margin-top:1.5rem"><strong>Booking requires a client account.</strong> <a href="client-login.html">Log in</a> or <a href="client-account.html">sign up</a> (Google supported).</p>
+</div></section>
+</main>
+<script type="module">
+  import { listItineraries, watchAuth, auth } from "./js/firebase-app.js";
+
+  const params = new URLSearchParams(location.search);
+  if (params.get("range")) document.getElementById("f-range").value = params.get("range");
+  if (params.get("q")) document.getElementById("f-q").value = params.get("q");
+
+  watchAuth((u) => {
+    const bar = document.getElementById("auth-bar");
+    if (u) bar.innerHTML = u.email + ' · <a href="client-login.html">Account</a>';
+  });
+
+  async function load() {
+    const range = document.getElementById("f-range").value;
+    const cat = document.getElementById("f-cat").value;
+    const q = document.getElementById("f-q").value.trim();
+    let list = await listItineraries({ status: "approved", range: range || undefined, q: q || undefined });
+    if (cat) list = list.filter((i) => (i.category || "").includes(cat));
+    const grid = document.getElementById("list");
+    if (!list.length) {
+      grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--ink-soft)">No approved packages match. Check back soon or ask a supplier to publish.</p>';
+      return;
+    }
+    grid.innerHTML = list.map((itin) => {
+      const parks = (itin.parks || []).slice(0, 3).join(" · ");
+      const img = itin.image || "https://www.voyageuganda.com/IMG_3108.jpeg";
+      return `<article class="itin-card">
+        <a class="img" href="itinerary-detail.html?id=${itin.id}" style="background-image:url('${img}')">
+          <span class="badge-price">From $${Number(itin.price||0).toLocaleString()}</span>
+        </a>
+        <div class="body">
+          ${itin.range ? `<span class="range-badge ${itin.range}">${itin.range}</span>` : ""}
+          <h3><a href="itinerary-detail.html?id=${itin.id}" style="color:inherit">${itin.title||""}</a></h3>
+          <div class="rating-line">★ ${(itin.rating||4.5).toFixed?.(1)||itin.rating||"4.5"} (${itin.reviewsCount||0} reviews)</div>
+          <div class="meta">${itin.duration||"?"} days · ${itin.category||"Safari"}</div>
+          <div class="gyg-meta">
+            <span class="gyg-chip">${itin.duration||"?"} days</span>
+            ${itin.freeCancel ? '<span class="gyg-chip green">Free cancellation</span>' : ""}
+            ${itin.languages ? `<span class="gyg-chip blue">${itin.languages}</span>` : ""}
+          </div>
+          <p class="summary" style="flex:1;font-size:.9rem;color:var(--ink-soft)">${itin.summary||""}</p>
+          <div class="parks" style="font-size:.8rem;color:var(--green-700)">${parks}</div>
+          <div style="display:flex;gap:.5rem;margin-top:.8rem">
+            <a class="btn btn-outline-dark" href="itinerary-detail.html?id=${itin.id}" style="flex:1;text-align:center;min-height:40px;padding:.5rem">Details</a>
+            <a class="btn btn-primary" href="itinerary-detail.html?id=${itin.id}" style="flex:1;text-align:center;min-height:40px;padding:.5rem">Book</a>
+          </div>
+        </div>
+      </article>`;
+    }).join("");
+  }
+
+  document.getElementById("f-range").onchange = load;
+  document.getElementById("f-cat").onchange = load;
+  document.getElementById("f-q").oninput = () => { clearTimeout(window.__t); window.__t = setTimeout(load, 300); };
+  load().catch((e) => {
+    document.getElementById("list").innerHTML = `<p style="grid-column:1/-1;color:#b3261e">Could not load: ${e.message}. Check Firestore rules &amp; network.</p>`;
+  });
+</script>
+</body>
+</html>

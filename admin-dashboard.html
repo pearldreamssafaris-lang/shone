@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard | Voyage Uganda</title>
+  <meta name="theme-color" content="#1b5a39">
+  <link rel="stylesheet" href="voyage-theme.css">
+  <style>
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1.5rem}
+    .stat-card{background:#fff;padding:1.1rem;border-radius:12px;border-top:3px solid var(--gold-500);box-shadow:var(--shadow-sm)}
+    .stat-card strong{display:block;font:800 1.6rem var(--font-display);color:var(--green-800)}
+    table{width:100%;border-collapse:collapse;font-size:.88rem;background:#fff}
+    th,td{padding:.7rem;border-bottom:1px solid var(--beige-200);text-align:left}
+    th{background:var(--beige-100);font-size:.75rem;text-transform:uppercase}
+    .badge-sm{font-size:.7rem;font-weight:800;padding:.2rem .5rem;border-radius:999px;text-transform:uppercase}
+    .b-pending{background:#fdefd6;color:var(--orange-700)}.b-approved{background:var(--green-100);color:var(--green-800)}
+    .b-draft{background:#eee;color:#555}.b-rejected{background:#fde8e8;color:#b3261e}
+    .b-active{background:var(--green-100);color:var(--green-800)}.b-unpaid{background:#fdefd6;color:var(--orange-700)}
+    .panel{background:#fff;padding:1.2rem;border-radius:12px;box-shadow:var(--shadow-sm);margin-bottom:1.2rem}
+    .err{color:#b3261e}
+  </style>
+</head>
+<body>
+<div class="topbar"><div class="container">
+  <span class="license">Admin · Firebase</span>
+  <span id="who"></span>
+</div></div>
+<header class="site-header"><div class="container">
+  <a class="brand" href="index.html"><img src="logo.png" alt="" width="46" height="46" onerror="this.style.display='none'">
+    <span class="brand-text"><span class="brand-name">voyage uganda</span><span class="brand-tag">Admin</span></span></a>
+  <nav class="nav"><a href="index.html">Site</a><a href="itineraries.html">Packages</a>
+    <a class="btn btn-primary" href="#" id="out">Sign out</a></nav>
+</div></header>
+
+<div id="gate" class="section" style="display:none">
+  <div class="container" style="max-width:420px">
+    <div class="form-card">
+      <h2 style="margin-top:0">Admin sign-in</h2>
+      <p style="font-size:.9rem;color:var(--ink-soft)">Use a Firebase user with <code>role: "admin"</code> in the <code>users</code> collection. First user: set role manually in Firestore Console.</p>
+      <form id="admin-login">
+        <div class="field"><label>Email</label><input name="email" type="email" required></div>
+        <div class="field"><label>Password</label><input name="password" type="password" required></div>
+        <p class="err" id="err"></p>
+        <button class="btn btn-primary" type="submit" style="width:100%">Enter</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <section class="section"><div class="container">
+    <h1 style="font-size:1.6rem;margin-top:0">Dashboard</h1>
+    <div class="stat-grid">
+      <div class="stat-card"><strong id="s-total">0</strong><span>Itineraries</span></div>
+      <div class="stat-card"><strong id="s-pending">0</strong><span>Pending</span></div>
+      <div class="stat-card"><strong id="s-approved">0</strong><span>Approved</span></div>
+      <div class="stat-card"><strong id="s-sup">0</strong><span>Suppliers</span></div>
+      <div class="stat-card"><strong id="s-paid">0</strong><span>Paid subs</span></div>
+    </div>
+
+    <div class="panel">
+      <h2 style="font-size:1.15rem;margin-top:0">Itinerary review</h2>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Title</th><th>Band</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="itin-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 style="font-size:1.15rem;margin-top:0">Suppliers &amp; annual billing (USD)</h2>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Company / email</th><th>Plan</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="sup-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div></section>
+</div>
+
+<script type="module">
+  import {
+    watchAuth, loginEmail, logout, getUserProfile,
+    listItineraries, setItineraryStatus, listSuppliers, activateSubscription, isSubscriptionActive
+  } from "./js/firebase-app.js";
+
+  const gate = document.getElementById("gate");
+  const app = document.getElementById("app");
+
+  async function enterAdmin(user) {
+    const profile = await getUserProfile(user.uid);
+    if (!profile || profile.role !== "admin") {
+      document.getElementById("err").textContent = "This account is not an admin. Set users/{uid}.role = \"admin\" in Firestore.";
+      document.getElementById("err").style.display = "block";
+      await logout();
+      gate.style.display = "block";
+      app.style.display = "none";
+      return;
+    }
+    gate.style.display = "none";
+    app.style.display = "block";
+    document.getElementById("who").textContent = user.email + " (admin)";
+    await refresh();
+  }
+
+  watchAuth(async (user) => {
+    if (!user) {
+      gate.style.display = "block";
+      app.style.display = "none";
+      return;
+    }
+    await enterAdmin(user);
+  });
+
+  document.getElementById("admin-login").onsubmit = async (e) => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    try {
+      await loginEmail(f.email, f.password);
+    } catch (ex) {
+      document.getElementById("err").style.display = "block";
+      document.getElementById("err").textContent = ex.message;
+    }
+  };
+  document.getElementById("out").onclick = async (e) => {
+    e.preventDefault();
+    await logout();
+  };
+
+  function badge(st) {
+    const c = st === "pending" ? "b-pending" : st === "approved" ? "b-approved" : st === "rejected" ? "b-rejected" : "b-draft";
+    return `<span class="badge-sm ${c}">${st||"draft"}</span>`;
+  }
+
+  async function refresh() {
+    const list = await listItineraries({});
+    document.getElementById("s-total").textContent = list.length;
+    document.getElementById("s-pending").textContent = list.filter((i) => i.status === "pending").length;
+    document.getElementById("s-approved").textContent = list.filter((i) => i.status === "approved").length;
+
+    document.getElementById("itin-body").innerHTML = list.map((i) => `
+      <tr>
+        <td><strong>${i.title||""}</strong><br><small>${(i.parks||[]).slice(0,2).join(", ")}</small></td>
+        <td>${i.range||"—"}</td>
+        <td>$${Number(i.price||0).toLocaleString()}</td>
+        <td>${badge(i.status)}</td>
+        <td>
+          <button class="btn btn-green" style="padding:.3rem .6rem;min-height:0;font-size:.75rem" data-a="${i.id}">Approve</button>
+          <button class="btn btn-outline-dark" style="padding:.3rem .6rem;min-height:0;font-size:.75rem" data-r="${i.id}">Reject</button>
+          <a href="itinerary-detail.html?id=${i.id}" style="font-size:.8rem">View</a>
+        </td>
+      </tr>`).join("") || "<tr><td colspan='5'>No itineraries yet</td></tr>";
+
+    document.querySelectorAll("[data-a]").forEach((b) => b.onclick = async () => {
+      await setItineraryStatus(b.dataset.a, "approved");
+      refresh();
+    });
+    document.querySelectorAll("[data-r]").forEach((b) => b.onclick = async () => {
+      await setItineraryStatus(b.dataset.r, "rejected");
+      refresh();
+    });
+
+    const sups = await listSuppliers();
+    document.getElementById("s-sup").textContent = sups.length;
+    document.getElementById("s-paid").textContent = sups.filter(isSubscriptionActive).length;
+    document.getElementById("sup-body").innerHTML = sups.map((s) => {
+      const paid = isSubscriptionActive(s);
+      const sub = s.subscription || {};
+      return `<tr>
+        <td><strong>${s.company||s.name||""}</strong><br><small>${s.email||s.id}</small></td>
+        <td>${sub.plan||"—"} ${sub.price?("USD "+sub.price):""}</td>
+        <td><span class="badge-sm ${paid?"b-active":"b-unpaid"}">${paid?"active":(sub.status||"unpaid")}</span></td>
+        <td>${!paid && sub.plan ? `<button class="btn btn-primary" style="padding:.3rem .6rem;min-height:0;font-size:.75rem" data-act="${s.id}" data-plan="${sub.plan}" data-price="${sub.price||0}">Activate 1 year</button>` : "—"}</td>
+      </tr>`;
+    }).join("") || "<tr><td colspan='4'>No suppliers</td></tr>";
+
+    document.querySelectorAll("[data-act]").forEach((b) => b.onclick = async () => {
+      if (!confirm("Activate annual subscription after confirming payment?")) return;
+      await activateSubscription(b.dataset.act, b.dataset.plan, Number(b.dataset.price));
+      alert("Subscription activated for 12 months.");
+      refresh();
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supplier Login | Voyage Uganda</title>
+  <meta name="theme-color" content="#1b5a39">
+  <link rel="stylesheet" href="voyage-theme.css">
+  <style>.login-card{max-width:420px;margin:0 auto}.err{color:#b3261e;font-size:.88rem;display:none}</style>
+</head>
+<body>
+<div class="topbar"><div class="container">
+  <span class="license">Supplier portal</span>
+  <span><a href="create-supplier-account.html">Register</a> · <a href="client-login.html">Client login</a></span>
+</div></div>
+<header class="site-header"><div class="container">
+  <a class="brand" href="index.html"><img src="logo.png" alt="" width="46" height="46" onerror="this.style.display='none'">
+    <span class="brand-text"><span class="brand-name">voyage uganda</span><span class="brand-tag">Supplier login</span></span></a>
+  <nav class="nav"><a href="index.html">Home</a><a href="supplier-subscription.html">Subscription</a>
+    <a class="btn btn-primary" href="create-supplier-account.html">Register</a></nav>
+</div></header>
+<main>
+<section class="section"><div class="container">
+  <div class="section-head">
+    <span class="eyebrow">Supplier portal</span>
+    <h2>Login as a supplier</h2>
+    <div class="divider"></div>
+    <p>Upload itineraries only with an <strong>active annual USD subscription</strong>. Viewing packages is always free.</p>
+  </div>
+  <form class="form-card login-card" id="supplier-login">
+    <div class="field"><label>Email *</label><input name="email" type="email" required autocomplete="username"></div>
+    <div class="field"><label>Password *</label><input name="password" type="password" required autocomplete="current-password"></div>
+    <p class="err" id="err"></p>
+    <button class="btn btn-primary" type="submit" style="width:100%;margin-top:1rem">Sign in</button>
+    <p class="form-note" style="text-align:center;margin-top:1rem">
+      <a href="create-supplier-account.html">Create supplier account</a> ·
+      <a href="supplier-subscription.html">Annual plans (USD)</a>
+    </p>
+  </form>
+</div></section>
+</main>
+<script type="module">
+  import { loginEmail, ensureUserProfile, getSupplier, isSubscriptionActive, watchAuth } from "./js/firebase-app.js";
+  watchAuth(async (u) => {
+    if (!u) return;
+    const sup = await getSupplier(u.uid);
+    if (sup && isSubscriptionActive(sup)) location.replace("itinerary-editor.html");
+    else location.replace("supplier-subscription.html");
+  });
+  document.getElementById("supplier-login").onsubmit = async (e) => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    const err = document.getElementById("err");
+    try {
+      const cred = await loginEmail(f.email, f.password);
+      await ensureUserProfile(cred.user, { role: "supplier" });
+      const sup = await getSupplier(cred.user.uid);
+      if (sup && isSubscriptionActive(sup)) location.href = "itinerary-editor.html";
+      else location.href = "supplier-subscription.html";
+    } catch (ex) {
+      err.style.display = "block";
+      err.textContent = ex.message || "Login failed";
+    }
+  };
+</script>
+</body>
+</html>

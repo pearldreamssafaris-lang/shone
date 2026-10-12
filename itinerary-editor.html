@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create itinerary | Voyage Uganda</title>
+  <meta name="theme-color" content="#1b5a39">
+  <link rel="stylesheet" href="voyage-theme.css">
+  <style>
+    .day-block{background:var(--beige-50);border:1.5px solid var(--beige-200);border-radius:12px;padding:1rem 1.2rem;margin-bottom:.8rem;position:relative}
+    .day-remove{position:absolute;top:.6rem;right:.6rem;border:0;background:none;color:#b3261e;cursor:pointer;font-weight:700}
+    .tag-chip{display:inline-block;background:var(--green-100);color:var(--green-800);padding:.25rem .65rem;border-radius:999px;font-size:.78rem;font-weight:600;cursor:pointer;margin:.2rem}
+    .tag-chip.selected{background:var(--green-700);color:#fff}
+    .park-tags,.lodge-tags{display:flex;flex-wrap:wrap;gap:.3rem;margin:.5rem 0}
+  </style>
+</head>
+<body>
+<div class="topbar"><div class="container">
+  <span class="license">Supplier editor · Annual subscription required</span>
+  <span id="user-slot"></span>
+</div></div>
+<header class="site-header"><div class="container">
+  <a class="brand" href="index.html"><img src="logo.png" alt="" width="46" height="46" onerror="this.style.display='none'">
+    <span class="brand-text"><span class="brand-name">voyage uganda</span><span class="brand-tag">Itinerary editor</span></span></a>
+  <nav class="nav"><a href="itineraries.html">Public list</a><a href="supplier-subscription.html">Subscription</a>
+    <a class="btn btn-primary" href="admin-dashboard.html">Admin</a></nav>
+</div></header>
+<main>
+<section class="section"><div class="container" style="max-width:960px">
+  <div class="section-head">
+    <span class="eyebrow">Create package</span>
+    <h2>Itinerary editor</h2>
+    <div class="divider"></div>
+  </div>
+  <div id="paywall" class="notice" style="display:none;margin-bottom:1rem">
+    <strong>Annual USD subscription required to upload.</strong>
+    You can still <a href="itineraries.html">view packages</a>.
+    <a class="btn btn-primary" href="supplier-subscription.html" style="margin-top:.6rem">View plans</a>
+  </div>
+  <form class="form-card" id="itin-form" style="display:none">
+    <div class="form-grid">
+      <div class="field full"><label>Title *</label><input name="title" required placeholder="e.g. 7-Day Uganda Gorilla Classic"></div>
+      <div class="field"><label>Duration (days) *</label><input name="duration" type="number" min="1" max="30" value="7" required></div>
+      <div class="field"><label>Category *</label>
+        <select name="category" required>
+          <option value="">Select</option>
+          <option>Gorilla trekking</option><option>Classic safari</option>
+          <option>Great Migration</option><option>Multi-country</option>
+          <option>Family / soft adventure</option>
+        </select>
+      </div>
+      <div class="field"><label>Budget band *</label>
+        <select name="range" required>
+          <option value="">Select</option>
+          <option value="budget">Budget</option>
+          <option value="midrange">Mid-range</option>
+          <option value="luxury">Luxury</option>
+        </select>
+      </div>
+      <div class="field full"><label>Summary *</label><textarea name="summary" rows="2" required></textarea></div>
+      <div class="field"><label>From price (USD) *</label><input name="price" type="number" min="50" required></div>
+      <div class="field"><label>Price basis</label>
+        <select name="price_basis"><option>per person sharing</option><option>per person</option></select></div>
+      <div class="field"><label>Difficulty</label>
+        <select name="difficulty"><option>Easy</option><option>Easy–Moderate</option><option>Moderate</option><option>Challenging</option></select></div>
+      <div class="field"><label>Group size</label><input name="group_size" placeholder="2–6"></div>
+      <div class="field"><label>Best season</label><input name="best_season" placeholder="Jun–Sep"></div>
+      <div class="field"><label>Transport</label><input name="transport" placeholder="Private 4×4"></div>
+      <div class="field"><label>Languages</label><input name="languages" value="EN"></div>
+      <div class="field"><label>Free cancellation</label>
+        <select name="freeCancel"><option value="true">Yes</option><option value="false">No</option></select></div>
+      <div class="field full"><label>Highlights (one per line)</label><textarea name="highlights" rows="3"></textarea></div>
+      <div class="field"><label>Includes (one per line)</label><textarea name="includes_list" rows="4"></textarea></div>
+      <div class="field"><label>Excludes (one per line)</label><textarea name="excludes_list" rows="4"></textarea></div>
+      <div class="field"><label>Cover photo *</label><input name="cover" type="file" accept="image/*" required></div>
+      <div class="field"><label>Gallery (multiple)</label><input name="gallery" type="file" accept="image/*" multiple></div>
+    </div>
+    <h3 style="margin-top:1.5rem;font-size:1.05rem">Parks (click)</h3>
+    <div class="park-tags" id="parks">
+      <span class="tag-chip" data-v="Bwindi Impenetrable NP">Bwindi</span>
+      <span class="tag-chip" data-v="Queen Elizabeth NP">Queen Elizabeth</span>
+      <span class="tag-chip" data-v="Murchison Falls NP">Murchison</span>
+      <span class="tag-chip" data-v="Kibale NP">Kibale</span>
+      <span class="tag-chip" data-v="Kidepo Valley NP">Kidepo</span>
+      <span class="tag-chip" data-v="Lake Mburo NP">Lake Mburo</span>
+      <span class="tag-chip" data-v="Volcanoes NP">Volcanoes</span>
+      <span class="tag-chip" data-v="Akagera NP">Akagera</span>
+      <span class="tag-chip" data-v="Nyungwe Forest NP">Nyungwe</span>
+      <span class="tag-chip" data-v="Masai Mara">Masai Mara</span>
+      <span class="tag-chip" data-v="Amboseli NP">Amboseli</span>
+      <span class="tag-chip" data-v="Serengeti NP">Serengeti</span>
+      <span class="tag-chip" data-v="Ngorongoro Crater">Ngorongoro</span>
+      <span class="tag-chip" data-v="Tarangire NP">Tarangire</span>
+    </div>
+    <h3 style="font-size:1.05rem">Lodges (click)</h3>
+    <div class="lodge-tags" id="lodges">
+      <span class="tag-chip" data-v="Buhoma Lodge">Buhoma Lodge</span>
+      <span class="tag-chip" data-v="Mahogany Springs">Mahogany Springs</span>
+      <span class="tag-chip" data-v="Mweya Safari Lodge">Mweya</span>
+      <span class="tag-chip" data-v="Paraa Safari Lodge">Paraa</span>
+      <span class="tag-chip" data-v="Primate Lodge Kibale">Primate Lodge</span>
+      <span class="tag-chip" data-v="Governors' Camp">Governors' Camp</span>
+      <span class="tag-chip" data-v="Four Seasons Serengeti">Four Seasons Serengeti</span>
+      <span class="tag-chip" data-v="Ngorongoro Crater Lodge">Ngorongoro Crater Lodge</span>
+    </div>
+    <h3 style="margin-top:1.2rem;font-size:1.05rem">Day-by-day</h3>
+    <div id="days"></div>
+    <button type="button" class="btn btn-outline-dark" id="add-day">+ Add day</button>
+    <div class="field" style="margin-top:1rem">
+      <label>Submit as</label>
+      <select name="status"><option value="pending">Submit for admin review</option><option value="draft">Save draft</option></select>
+    </div>
+    <button class="btn btn-primary" type="submit" style="width:100%;margin-top:1rem" id="save-btn">Save itinerary</button>
+    <p id="msg" class="form-note"></p>
+  </form>
+</div></section>
+</main>
+<script type="module">
+  import {
+    watchAuth, getSupplier, isSubscriptionActive, createItinerary,
+    uploadToCloudinary, uploadMany, cloudinaryConfig, logout
+  } from "./js/firebase-app.js";
+
+  const selectedParks = new Set();
+  const selectedLodges = new Set();
+  let dayN = 0;
+  const daysEl = document.getElementById("days");
+
+  function setupChips(id, set) {
+    document.getElementById(id).querySelectorAll(".tag-chip").forEach((c) => {
+      c.onclick = () => {
+        const v = c.dataset.v;
+        if (set.has(v)) { set.delete(v); c.classList.remove("selected"); }
+        else { set.add(v); c.classList.add("selected"); }
+      };
+    });
+  }
+  setupChips("parks", selectedParks);
+  setupChips("lodges", selectedLodges);
+
+  function addDay() {
+    dayN++;
+    const d = document.createElement("div");
+    d.className = "day-block";
+    d.innerHTML = `<button type="button" class="day-remove">✕</button><h4>Day ${dayN}</h4>
+      <div class="form-grid">
+        <div class="field full"><label>Title</label><input name="day_title_${dayN}"></div>
+        <div class="field full"><label>Description</label><textarea name="day_desc_${dayN}" rows="2"></textarea></div>
+        <div class="field"><label>Lodge</label><input name="day_lodge_${dayN}"></div>
+        <div class="field"><label>Meals</label><input name="day_meals_${dayN}" value="B, L, D"></div>
+      </div>`;
+    d.querySelector(".day-remove").onclick = () => d.remove();
+    daysEl.appendChild(d);
+  }
+  document.getElementById("add-day").onclick = addDay;
+  addDay(); addDay(); addDay();
+
+  const form = document.getElementById("itin-form");
+  const paywall = document.getElementById("paywall");
+
+  watchAuth(async (user) => {
+    const slot = document.getElementById("user-slot");
+    if (!user) {
+      paywall.style.display = "block";
+      paywall.innerHTML = 'Please <a href="Login.html">sign in as a supplier</a> with an active annual subscription.';
+      form.style.display = "none";
+      return;
+    }
+    slot.innerHTML = user.email + ' · <a href="#" id="lo">Sign out</a>';
+    document.getElementById("lo").onclick = async (e) => { e.preventDefault(); await logout(); location.href = "Login.html"; };
+    const sup = await getSupplier(user.uid);
+    if (!sup || !isSubscriptionActive(sup)) {
+      paywall.style.display = "block";
+      form.style.display = "none";
+      return;
+    }
+    paywall.style.display = "none";
+    form.style.display = "block";
+    form.dataset.uid = user.uid;
+  });
+
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("save-btn");
+    const msg = document.getElementById("msg");
+    btn.disabled = true;
+    btn.textContent = "Uploading…";
+    try {
+      const fd = new FormData(form);
+      const lines = (s) => (s || "").split("\n").map((x) => x.trim()).filter(Boolean);
+      let image = "";
+      const gallery = [];
+      if (form.cover.files[0]) {
+        image = await uploadToCloudinary(form.cover.files[0], cloudinaryConfig.itineraryFolder);
+      }
+      if (form.gallery.files.length) {
+        gallery.push(...await uploadMany([...form.gallery.files], cloudinaryConfig.galleryFolder));
+      }
+      const days = [];
+      daysEl.querySelectorAll(".day-block").forEach((block, i) => {
+        const n = i + 1;
+        days.push({
+          day: n,
+          title: form[`day_title_${n}`]?.value || "",
+          desc: form[`day_desc_${n}`]?.value || "",
+          lodge: form[`day_lodge_${n}`]?.value || "",
+          meals: form[`day_meals_${n}`]?.value || ""
+        });
+      });
+      const id = await createItinerary({
+        title: fd.get("title"),
+        duration: Number(fd.get("duration")),
+        category: fd.get("category"),
+        range: fd.get("range"),
+        summary: fd.get("summary"),
+        price: Number(fd.get("price")),
+        price_basis: fd.get("price_basis"),
+        difficulty: fd.get("difficulty"),
+        group_size: fd.get("group_size"),
+        best_season: fd.get("best_season"),
+        transport: fd.get("transport"),
+        languages: fd.get("languages"),
+        freeCancel: fd.get("freeCancel") === "true",
+        highlights: lines(fd.get("highlights")),
+        includes: lines(fd.get("includes_list")),
+        excludes: lines(fd.get("excludes_list")),
+        parks: [...selectedParks],
+        lodges: [...selectedLodges],
+        days,
+        image,
+        gallery,
+        status: fd.get("status") || "pending",
+        supplierId: form.dataset.uid
+      });
+      msg.textContent = "Saved. ID: " + id + (fd.get("status") === "pending" ? " — awaiting admin approval." : " (draft)");
+      alert(msg.textContent);
+      if (fd.get("status") === "pending") location.href = "itineraries.html";
+    } catch (ex) {
+      msg.textContent = ex.message || "Save failed";
+      alert(msg.textContent);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Save itinerary";
+    }
+  };
+</script>
+</body>
+</html>

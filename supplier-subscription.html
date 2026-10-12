@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supplier annual subscription (USD) | Voyage Uganda</title>
+  <meta name="theme-color" content="#1b5a39">
+  <link rel="stylesheet" href="voyage-theme.css">
+  <style>
+    .plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.3rem;margin-top:1.5rem}
+    .plan-card{background:#fff;border-radius:14px;padding:1.6rem;border:2px solid var(--beige-200);display:flex;flex-direction:column}
+    .plan-card.featured{border-color:var(--orange-500)}
+    .plan-card .price{font:800 2rem var(--font-display);color:var(--green-900);margin:.5rem 0}
+    .plan-card ul{list-style:none;padding:0;margin:0 0 1.2rem;flex:1}
+    .plan-card li{padding:.3rem 0 .3rem 1.2rem;position:relative;font-size:.9rem}
+    .plan-card li::before{content:"✓";position:absolute;left:0;color:var(--green-700);font-weight:700}
+    .status-box{padding:1rem 1.2rem;border-radius:8px;margin-bottom:1.2rem;background:#fdefd6}
+    .status-box.active{background:var(--green-100)}
+  </style>
+</head>
+<body>
+<div class="topbar"><div class="container">
+  <span class="license">Supplier billing · USD / year</span>
+  <span><a href="Login.html">Supplier login</a></span>
+</div></div>
+<header class="site-header"><div class="container">
+  <a class="brand" href="index.html"><img src="logo.png" alt="" width="46" height="46" onerror="this.style.display='none'">
+    <span class="brand-text"><span class="brand-name">voyage uganda</span><span class="brand-tag">Subscription</span></span></a>
+  <nav class="nav"><a href="itineraries.html">View packages</a><a href="itinerary-editor.html">Upload</a>
+    <a class="btn btn-primary" href="Login.html">Login</a></nav>
+</div></header>
+<main>
+<section class="section"><div class="container" style="max-width:960px">
+  <div class="section-head">
+    <span class="eyebrow">Annual subscription</span>
+    <h2>Pay once per year in USD</h2>
+    <div class="divider"></div>
+    <p>Required to <strong>upload</strong> itineraries. Viewing is free. Admin activates after payment to official accounts.</p>
+  </div>
+  <div id="status" class="status-box">Checking account…</div>
+  <div class="plan-grid">
+    <div class="plan-card"><h3>Starter</h3><div class="price">$199 <small>/ year</small></div>
+      <ul><li>Up to 5 itineraries</li><li>Admin review</li><li>Public listing</li></ul>
+      <button class="btn btn-outline-dark" style="width:100%" data-plan="starter">Request Starter</button></div>
+    <div class="plan-card featured"><h3>Professional</h3><div class="price">$399 <small>/ year</small></div>
+      <ul><li>Unlimited itineraries</li><li>Priority review</li><li>Band placement</li></ul>
+      <button class="btn btn-primary" style="width:100%" data-plan="professional">Request Professional</button></div>
+    <div class="plan-card"><h3>Partner</h3><div class="price">$699 <small>/ year</small></div>
+      <ul><li>Unlimited</li><li>Homepage options</li><li>Dedicated support</li></ul>
+      <button class="btn btn-outline-dark" style="width:100%" data-plan="partner">Request Partner</button></div>
+  </div>
+  <p class="notice" style="margin-top:1.5rem"><strong>Pay only to official company accounts.</strong></p>
+</div></section>
+</main>
+<script type="module">
+  import { watchAuth, getSupplier, isSubscriptionActive, requestSubscription } from "./js/firebase-app.js";
+  const statusEl = document.getElementById("status");
+  let currentUser = null;
+  async function refresh(user) {
+    currentUser = user;
+    if (!user) {
+      statusEl.innerHTML = 'Please <a href="Login.html">sign in as a supplier</a>. You can still <a href="itineraries.html">view packages</a>.';
+      return;
+    }
+    const sup = await getSupplier(user.uid);
+    if (sup && isSubscriptionActive(sup)) {
+      statusEl.className = "status-box active";
+      const sub = sup.subscription;
+      statusEl.innerHTML = `<strong>Active</strong> — ${sub.plan} · USD ${sub.price}/year · until ${new Date(sub.expires).toLocaleDateString()}. <a href="itinerary-editor.html">Upload →</a>`;
+    } else if (sup?.subscription?.status === "pending_payment") {
+      statusEl.innerHTML = `<strong>Payment pending</strong> — ${sup.subscription.plan} (USD ${sup.subscription.price}). Admin activates after payment.`;
+    } else {
+      statusEl.innerHTML = `<strong>No active plan</strong> for ${user.email}. Choose below. Viewing packages stays free.`;
+    }
+  }
+  watchAuth(refresh);
+  document.querySelectorAll("[data-plan]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      if (!currentUser) { location.href = "Login.html"; return; }
+      try {
+        const plan = await requestSubscription(currentUser.uid, btn.dataset.plan);
+        const msg = `Supplier subscription request\nEmail: ${currentUser.email}\nPlan: ${plan.name}\nUSD ${plan.price}/year`;
+        window.open("https://wa.me/256762584996?text=" + encodeURIComponent(msg), "_blank");
+        alert("Request saved. Pay official accounts only; admin activates for 12 months.");
+        refresh(currentUser);
+      } catch (e) {
+        if (String(e).includes("No document") || e.code === "not-found") {
+          alert("Register your supplier company first.");
+          location.href = "create-supplier-account.html";
+        } else alert(e.message || "Failed");
+      }
+    });
+  });
+</script>
+</body>
+</html>

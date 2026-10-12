@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Become a Supplier | Voyage Uganda</title>
+  <meta name="theme-color" content="#1b5a39">
+  <link rel="stylesheet" href="voyage-theme.css">
+  <style>.err{color:#b3261e;display:none;font-size:.88rem}</style>
+</head>
+<body>
+<div class="topbar"><div class="container">
+  <span class="license">Supplier registration</span>
+  <span><a href="Login.html">Supplier login</a></span>
+</div></div>
+<header class="site-header"><div class="container">
+  <a class="brand" href="index.html"><img src="logo.png" alt="" width="46" height="46" onerror="this.style.display='none'">
+    <span class="brand-text"><span class="brand-name">voyage uganda</span><span class="brand-tag">Become a supplier</span></span></a>
+  <nav class="nav"><a href="index.html">Home</a><a href="supplier-subscription.html">Subscription</a>
+    <a class="btn btn-primary" href="Login.html">Login</a></nav>
+</div></header>
+<main>
+<section class="section"><div class="container" style="max-width:900px">
+  <div class="section-head">
+    <span class="eyebrow">Supplier registration</span>
+    <h2>Become a supplier</h2>
+    <div class="divider"></div>
+    <p>Register your company. Documents stored via Cloudinary. Annual <a href="supplier-subscription.html">USD subscription</a> required to upload itineraries.</p>
+  </div>
+  <form class="form-card" id="supplier-form">
+    <h3 style="font-size:1.1rem">Account</h3>
+    <div class="form-grid">
+      <div class="field"><label>Contact name *</label><input name="name" required></div>
+      <div class="field"><label>Email *</label><input name="email" type="email" required></div>
+      <div class="field"><label>Password * (min 6)</label><input name="password" type="password" required minlength="6"></div>
+      <div class="field"><label>Phone *</label><input name="phone" type="tel" required></div>
+    </div>
+    <h3 style="font-size:1.1rem;margin-top:1.5rem">Company</h3>
+    <div class="form-grid">
+      <div class="field"><label>Company name *</label><input name="company" required></div>
+      <div class="field"><label>Office location *</label><input name="location" required></div>
+      <div class="field"><label>UTB number *</label><input name="utb" required></div>
+      <div class="field"><label>URSB number *</label><input name="ursb" required></div>
+      <div class="field"><label>TIN *</label><input name="tin" required></div>
+      <div class="field"><label>Staff</label><input name="staff" type="number" min="1" value="2"></div>
+      <div class="field full"><label>Main offering *</label>
+        <select name="interest" required>
+          <option value="">Select</option>
+          <option>Lodges / Accommodation</option>
+          <option>Safari vehicles</option>
+          <option>Safari itineraries</option>
+          <option>Activities</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Website</label><input name="website" type="url" placeholder="https://"></div>
+      <div class="field"><label>Instagram</label><input name="instagram" placeholder="https://instagram.com/..."></div>
+      <div class="field"><label>Logo</label><input name="logo" type="file" accept="image/*"></div>
+      <div class="field"><label>Cover photo</label><input name="cover" type="file" accept="image/*"></div>
+      <div class="field"><label>UTB certificate</label><input name="utb_file" type="file" accept=".pdf,image/*"></div>
+      <div class="field"><label>URSB certificate</label><input name="ursb_file" type="file" accept=".pdf,image/*"></div>
+    </div>
+    <p class="err" id="err"></p>
+    <button class="btn btn-primary" type="submit" style="width:100%;margin-top:1.2rem" id="submit-btn">Create supplier account</button>
+    <p class="form-note">After registration, choose an annual plan to upload itineraries.</p>
+  </form>
+</div></section>
+</main>
+<script type="module">
+  import {
+    registerEmail, ensureUserProfile, saveSupplierProfile, uploadToCloudinary, cloudinaryConfig
+  } from "./js/firebase-app.js";
+
+  document.getElementById("supplier-form").onsubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const f = Object.fromEntries(new FormData(form));
+    const err = document.getElementById("err");
+    const btn = document.getElementById("submit-btn");
+    btn.disabled = true;
+    btn.textContent = "Creating…";
+    try {
+      const cred = await registerEmail(f.email, f.password, f.name);
+      await ensureUserProfile(cred.user, { role: "supplier", name: f.name, phone: f.phone });
+
+      let logoUrl = "", coverUrl = "", utbDoc = "", ursbDoc = "";
+      const folder = cloudinaryConfig.supplierFolder;
+      if (form.logo.files[0]) logoUrl = await uploadToCloudinary(form.logo.files[0], folder);
+      if (form.cover.files[0]) coverUrl = await uploadToCloudinary(form.cover.files[0], folder);
+      if (form.utb_file.files[0]) utbDoc = await uploadToCloudinary(form.utb_file.files[0], folder);
+      if (form.ursb_file.files[0]) ursbDoc = await uploadToCloudinary(form.ursb_file.files[0], folder);
+
+      await saveSupplierProfile(cred.user.uid, {
+        name: f.name,
+        email: f.email,
+        phone: f.phone,
+        company: f.company,
+        location: f.location,
+        utb: f.utb,
+        ursb: f.ursb,
+        tin: f.tin,
+        staff: f.staff || "",
+        interest: f.interest,
+        website: f.website || "",
+        instagram: f.instagram || "",
+        logoUrl,
+        coverUrl,
+        utbDoc,
+        ursbDoc,
+        verification: "pending"
+      });
+
+      alert("Account created. Choose an annual USD plan to upload itineraries.");
+      location.href = "supplier-subscription.html";
+    } catch (ex) {
+      err.style.display = "block";
+      err.textContent = ex.message || "Registration failed";
+      btn.disabled = false;
+      btn.textContent = "Create supplier account";
+    }
+  };
+</script>
+</body>
+</html>

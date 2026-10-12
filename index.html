@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Voyage Uganda | Gorilla Trekking &amp; East Africa Safaris</title>
+  <meta name="description" content="Book verified safari itineraries across Uganda, Rwanda, Kenya and Tanzania. Browse by luxury, mid-range or budget. Transparent prices. Local suppliers.">
+  <meta name="theme-color" content="#1b5a39">
+  <link rel="stylesheet" href="voyage-theme.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="container">
+    <span class="license">Licensed Uganda Tour Operator · Verified suppliers</span>
+    <span>
+      <a href="client-login.html">Client login</a>&nbsp;•&nbsp;
+      <a href="client-account.html">Create account</a>&nbsp;•&nbsp;
+      <a href="Login.html">Supplier login</a>
+    </span>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="index.html" aria-label="Voyage Uganda — home">
+      <img src="logo.png" alt="" width="46" height="46" onerror="this.style.display='none'">
+      <span class="brand-text">
+        <span class="brand-name">voyage uganda</span>
+        <span class="brand-tag">Where your dreams meet reality</span>
+      </span>
+    </a>
+    <button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="index.html" aria-current="page">Home</a>
+      <a href="itineraries.html">Itineraries</a>
+      <a href="#ranges">By budget</a>
+      <a href="#destinations">Destinations</a>
+      <a href="create-supplier-account.html">Sell with us</a>
+      <a class="btn btn-primary" href="client-account.html">Plan my trip</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero" style="background-image:url('https://www.voyageuganda.com/IMG_3108.jpeg')">
+    <div class="container">
+      <span class="eyebrow">Uganda · Rwanda · Kenya · Tanzania</span>
+      <h1>Safari packages you can compare and book with confidence</h1>
+      <p class="lead">Browse luxury, mid-range and budget itineraries from verified local operators. Transparent prices. Day-by-day detail. Book after a free account — or just explore.</p>
+
+      <form class="search-bar" id="trip-finder" action="itineraries.html" method="get">
+        <div class="field">
+          <label for="s-dest">Destination</label>
+          <select id="s-dest" name="dest">
+            <option value="">Anywhere in East Africa</option>
+            <option>Uganda</option>
+            <option>Rwanda</option>
+            <option>Kenya</option>
+            <option>Tanzania</option>
+            <option>Multi-country</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="s-range">Budget style</label>
+          <select id="s-range" name="range">
+            <option value="">Any</option>
+            <option value="budget">Budget</option>
+            <option value="midrange">Mid-range</option>
+            <option value="luxury">Luxury</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="s-days">Duration</label>
+          <select id="s-days" name="days">
+            <option value="">Any length</option>
+            <option>1–4 days</option>
+            <option>5–7 days</option>
+            <option>8–14 days</option>
+            <option>15+ days</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Search packages</button>
+      </form>
+    </div>
+  </section>
+
+  <div class="trust">
+    <div class="container">
+      <div class="trust-grid">
+        <div class="trust-item"><strong>Verified suppliers</strong><span>UTB / URSB checked</span></div>
+        <div class="trust-item"><strong>3 price bands</strong><span>Budget · Mid · Luxury</span></div>
+        <div class="trust-item"><strong>Admin-approved</strong><span>Only live packages</span></div>
+        <div class="trust-item"><strong>4 countries</strong><span>Uganda to Tanzania</span></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="section" id="how">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">How it works</span>
+        <h2>Find, compare, book — like a modern safari platform</h2>
+        <div class="divider"></div>
+      </div>
+      <div class="grid grid-3">
+        <article class="feature">
+          <div class="icon" aria-hidden="true">1</div>
+          <h3>Browse by budget</h3>
+          <p>Scroll luxury, mid-range or budget rows. Every card shows duration, parks and a clear “from” price.</p>
+        </article>
+        <article class="feature">
+          <div class="icon" aria-hidden="true">2</div>
+          <h3>Open full details</h3>
+          <p>Day-by-day plan, lodges, inclusions and exclusions — structured like leading booking sites.</p>
+        </article>
+        <article class="feature">
+          <div class="icon" aria-hidden="true">3</div>
+          <h3>Book when ready</h3>
+          <p>View freely without an account. To enquire or book, sign in or create a free account (Google available).</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-beige" id="ranges">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Choose your style</span>
+        <h2>Packages by budget band</h2>
+        <div class="divider"></div>
+        <p>Scroll sideways on each row — or open the full list. All packages below are admin-approved with transparent pricing.</p>
+      </div>
+
+      <div class="range-section">
+        <div class="range-head">
+          <h3><span class="range-badge luxury">Luxury</span> Premium lodges &amp; private guiding</h3>
+          <a href="itineraries.html?range=luxury">View all luxury →</a>
+        </div>
+        <div class="scroll-row" id="row-luxury"></div>
+      </div>
+
+      <div class="range-section">
+        <div class="range-head">
+          <h3><span class="range-badge midrange">Mid-range</span> Comfort lodges, strong value</h3>
+          <a href="itineraries.html?range=midrange">View all mid-range →</a>
+        </div>
+        <div class="scroll-row" id="row-midrange"></div>
+      </div>
+
+      <div class="range-section">
+        <div class="range-head">
+          <h3><span class="range-badge budget">Budget</span> Smart safaris, clear inclusions</h3>
+          <a href="itineraries.html?range=budget">View all budget →</a>
+        </div>
+        <div class="scroll-row" id="row-budget"></div>
+      </div>
+
+      <p style="text-align:center;margin-top:1.5rem">
+        <a class="btn btn-primary" href="itineraries.html">Browse all itineraries</a>
+        <a class="btn btn-outline-dark" href="itinerary-editor.html" style="margin-left:.5rem">Suppliers: add a package</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="destinations">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Top destinations</span>
+        <h2>Where will you go?</h2>
+        <div class="divider"></div>
+      </div>
+      <div class="grid grid-4">
+        <a class="dest" href="itineraries.html?q=Bwindi" style="background-image:url('https://www.voyageuganda.com/IMG_3108.jpeg')">
+          <span class="tag">Uganda</span><h3>Bwindi</h3>
+          <p>Mountain gorilla trekking in misty rainforest.</p>
+          <span class="more">See packages →</span>
+        </a>
+        <a class="dest" href="itineraries.html?q=Murchison" style="background-image:url('https://www.voyageuganda.com/3b9198fe-0483-40fa-8c7d-fb7706cdde46.jpeg')">
+          <span class="tag">Uganda</span><h3>Murchison Falls</h3>
+          <p>Nile boat cruise and big-game drives.</p>
+          <span class="more">See packages →</span>
+        </a>
+        <a class="dest" href="itineraries.html?q=Mara" style="background-image:url('https://www.voyageuganda.com/IMG_3138.jpeg')">
+          <span class="tag">Kenya</span><h3>Masai Mara</h3>
+          <p>Big cats and migration crossings.</p>
+          <span class="more">See packages →</span>
+        </a>
+        <a class="dest" href="itineraries.html?q=Serengeti" style="background-image:url('https://www.voyageuganda.com/IMG_3135.jpeg')">
+          <span class="tag">Tanzania</span><h3>Serengeti</h3>
+          <p>Endless plains and the Great Migration.</p>
+          <span class="more">See packages →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section cta">
+    <div class="container">
+      <span class="eyebrow">Ready when you are</span>
+      <h2>Questions before you book?</h2>
+      <p>Message us anytime. No pressure — we help you compare packages and seasons first.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://wa.me/256762584996?text=Hello%20Voyage%20Uganda%2C%20I%20would%20like%20to%20enquire%20about%20a%20safari">Chat on WhatsApp</a>
+        <a class="btn btn-outline" href="client-account.html">Create free account</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <h4>Voyage Uganda</h4>
+        <p>Licensed local operator connecting travellers with verified suppliers across Uganda, Rwanda, Kenya and Tanzania.</p>
+        <p>
+          <a href="https://www.instagram.com/voyageuganda">Instagram</a> ·
+          <a href="https://www.tiktok.com/@voyageuganda">TikTok</a> ·
+          <a href="https://www.youtube.com/@voyageuganda">YouTube</a>
+        </p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="itineraries.html">All itineraries</a></li>
+          <li><a href="itineraries.html?range=luxury">Luxury</a></li>
+          <li><a href="itineraries.html?range=midrange">Mid-range</a></li>
+          <li><a href="itineraries.html?range=budget">Budget</a></li>
+          <li><a href="itinerary-editor.html">Create a package</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Accounts</h4>
+        <ul>
+          <li><a href="client-login.html">Client login</a></li>
+          <li><a href="client-account.html">Create client account</a></li>
+          <li><a href="Login.html">Supplier login</a></li>
+          <li><a href="create-supplier-account.html">Become a supplier</a></li>
+          <li><a href="admin-dashboard.html">Admin dashboard</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li>+256 789 336 441</li>
+          <li>+256 762 584 996</li>
+          <li><a href="mailto:info@voyageuganda.com">info@voyageuganda.com</a></li>
+          <li>Kampala, Uganda</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Voyage Uganda &amp; Travel Co. Ltd.</span>
+      <span>Registered Uganda Tour Operator</span>
+    </div>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/256762584996" aria-label="Chat on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM7 9h10v2H7zm0 4h7v2H7zm0-6h10v2H7z"/></svg>
+</a>
+
+<script type="module">
+  import { listItineraries } from "./js/firebase-app.js";
+
+  function starsHTML(score) {
+    const full = Math.round(score || 0);
+    let s = "";
+    for (let i = 1; i <= 5; i++) s += i <= full ? "★" : '<span class="muted">★</span>';
+    return '<span class="stars">' + s + "</span>";
+  }
+
+  function cardHTML(p) {
+    const img = p.image || "https://www.voyageuganda.com/IMG_3108.jpeg";
+    const rating = p.rating || 4.5;
+    const reviews = p.reviewsCount || 0;
+    let chips = '<div class="gyg-meta">';
+    chips += '<span class="gyg-chip">' + (p.duration || "?") + " days</span>";
+    if (p.freeCancel) chips += '<span class="gyg-chip green">Free cancellation</span>';
+    if (p.languages) chips += '<span class="gyg-chip blue">' + p.languages + "</span>";
+    chips += "</div>";
+    const parks = Array.isArray(p.parks) ? p.parks.slice(0, 3).join(" · ") : (p.parks || "");
+    return (
+      '<article class="scroll-card">' +
+      '<a href="itinerary-detail.html?id=' + p.id + '" class="card-img" style="background-image:url(\'' + img + '\');display:block"></a>' +
+      '<div class="card-body">' +
+      (p.range ? '<span class="range-badge ' + p.range + '">' + p.range + "</span>" : "") +
+      '<h3 style="margin-top:.5rem"><a href="itinerary-detail.html?id=' + p.id + '" style="color:inherit">' + (p.title || "") + "</a></h3>" +
+      '<div class="rating-line">' + starsHTML(rating) + ' <span class="score">' + Number(rating).toFixed(1) + "</span> <span>(" + reviews + " reviews)</span></div>" +
+      '<div class="meta">' + parks + "</div>" +
+      chips +
+      '<p class="summary">' + (p.summary || "") + "</p>" +
+      '<div class="price-row"><div><strong>from $' + Number(p.price || 0).toLocaleString() + '</strong></div>' +
+      '<a class="btn btn-primary" href="itinerary-detail.html?id=' + p.id + '" style="padding:.45rem .9rem;min-height:0;font-size:.8rem">Details</a></div>' +
+      "</div></article>"
+    );
+  }
+
+  function fillRow(id, range, list) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const items = list.filter((p) => p.range === range);
+    el.innerHTML = items.length
+      ? items.map(cardHTML).join("")
+      : '<p style="color:var(--ink-soft);padding:1rem">No ' + range + " packages yet.</p>";
+  }
+
+  listItineraries({ status: "approved" })
+    .then((list) => {
+      fillRow("row-luxury", "luxury", list);
+      fillRow("row-midrange", "midrange", list);
+      fillRow("row-budget", "budget", list);
+    })
+    .catch((e) => {
+      console.error(e);
+      ["row-luxury", "row-midrange", "row-budget"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '<p style="color:#b3261e;padding:1rem">Could not load packages. Check Firebase.</p>';
+      });
+    });
+
+  const toggle = document.querySelector(".menu-toggle");
+  const nav = document.getElementById("nav");
+  if (toggle && nav) {
+    toggle.addEventListener("click", () => {
+      const open = nav.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", open);
+    });
+  }
+</script>
+</body>
+</html>
